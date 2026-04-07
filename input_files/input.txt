@@ -1,0 +1,6 @@
+Model Name,File Location,Type,Historical or Planning Model
+PEST26,data/CS3_I6_Action5base_MaxProtectShasta_SODTrans_PEST26.csv,PEST26,Planning
+PEST24,data/I6_PEST24_SODTrans.csv,PEST24,Planning
+PEST20,data/I6_PEST20_SODTrans.csv,PEST20,Planning
+Init6,data/I6_NewGWDLL_Base_SODTrans.csv,Base,Planning
+Historical Data,data\historical_data.csv,Historical,Historical

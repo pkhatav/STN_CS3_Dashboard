@@ -1,0 +1,170 @@
+define AW_02 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_03 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_04 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_05 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_06 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_07N {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_07S {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_08N {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_08S {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_09 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_10 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_11 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_12 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_13 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_14 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_15N {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_15S {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_16 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_17N {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_17S {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_18 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_19 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_20 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_21 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_22 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_23 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_24 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_25 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_26N {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_26S {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_50 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_60N {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_60S {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_61 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_62 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_63 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_64 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_71 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_72 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_73 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_90 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_91 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_SAC {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_SJV {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define AW_Total {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define CT_TOTAL {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define CT_SACValley {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define CT_CS3HIST_SAC {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define CT_CS3HIST_SAC_Summer1 {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define CT_SJV {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define CT_CS3HIST_SJR {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define DP_TOTAL {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define DP_SAC {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define DP_SJV {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define DP_EA_Total {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define DP_GWR_Total {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define GP_GWR_Total {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define SR_SAC {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define SR_SJV {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define SR_TOTAL {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define GP_SJV {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define GP_SAC {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define GP_TOTAL {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define DG_SAC {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define R_SJV {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define R_SAC {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define R_TOTAL {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define SG_SJV {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define SG_SAC {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define SG_Total {alias variables_to_sum[i][ITP] kind 'water_balance' units 'cfs'}
+define Sac_River_Outflow {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Yolo_Bypass_Outflow {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Trinity River Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Whiskeytown Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Shasta Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Folsom Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Oroville Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Stony Creek Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Cache Creek Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Inflow to CVP Reservoirs NOD {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Acc_Shasta_Keswick {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Keswick_Bendbridge {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Shasta_Bendbridge_LessClearCreek {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Bendbridge_Vina {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Vina_Hamilton {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Hamilton_OrdFerry {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Bendbridge_OrdFerry {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_OrdFerry_ButteCity {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_ButteCity_Colusa {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Colusa_WilkinSlough {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_OrdFerry_WilkinSlough {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Shasta_WilkinSlough {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Shasta_WilkinSlough_LessTrinity {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Shasta_WilkinsSlough_LessTrinity_PlusWeirs {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Spills to Butte-Sutter Basin {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Colusa Basin Outflow {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Sutter Bypass Outflow {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Feather River Outflow {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Feather River Basin Outflow {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_WilkinSlough_Verona {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define American River Outflow {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Verona_Freeport {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Freeport_RWWTP {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Verona_RWWTP {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_RWWTP_RioVista {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Friant {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_GF {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define ACC_Mendota {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Stev {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_FF {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Newman {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_CrowsLanding {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define Acc_Vernalis {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define MID_Diversions {alias variables_to_sum[i][ITP] kind 'river_accretions' units 'cfs'}
+define CVP STORAGE {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define SWP STORAGE {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define CVP NOD STORAGE {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define SWP NOD STORAGE {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define CVP SAN LUIS STORAGE {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define Combined CVP SWP Storage {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define STONY CREEK STORAGE {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define CACHE CREEK STORAGE {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define S_EBMUD {alias variables_to_sum[i][ITP] kind 'storage' units 'cfs'}
+define MELONES INFLOW {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Pedro Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Total Delta Inflow {alias variables_to_sum[i][ITP] kind 'inflow' units 'cfs'}
+define Delta SOD Export {alias variables_to_sum[i][ITP] kind 'delta' units 'cfs'}
+define Total CVP Settlement Diversions Sacramento River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total CVP Water Service Diversions Sacramento River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total CVP Refuge Diversions Sacramento River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Other Diversions Sacramento River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Diversions Sacramento River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total City of Sacramento {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Diversion American River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Lower Sacramento and American River Diversions {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Joint Board Districts - Total Diversion {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Thermalito Afterbay Diversions {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Oroville Thermalito Diversions {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Diversions Feather River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Whiskeytown Deliveries {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Diversions Stony Creek {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Diversions Putah Creek {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Diversions Cache Creek {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define YCWA Diversions {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Diversions Lower Yuba River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define Total Diversions Lower Bear River {alias variables_to_sum[i][ITP] kind 'diversion' units 'cfs'}
+define CVP Urban GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define CVP Ag GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define CVP Ag Settlement GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define CVP Urban Settlement GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define SWP Settlement GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define CVP Refuge GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define Non-Project Refuge GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define Non-Project Ag GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define Non-Project Urban GW Pumping {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define GW Pumping Total {alias variables_to_sum[i][ITP] kind 'gw_pumping' units 'cfs'}
+define Upper DMC Deliveries {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define Lower DMC Deliveries {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define Mendota Pool Deliveries {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define Delta-Mendota Canal Losses {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define San Felipe Deliveries {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define San Luis Canal Deliveries {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define San Luis Canal Losses {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define CVP Total SOD Deliveries {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define CVP SOD Contractors {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define CVP SOD Refuge {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define CVP SOD Exchange {alias variables_to_sum[i][ITP] kind 'flow_delivery' units 'cfs'}
+define D_CAAXXX_90_PA1 {alias variables_to_sum[i][ITP] kind 'cs3_hist' units 'cfs'}
+define D_CAAXXX_90_PU {alias variables_to_sum[i][ITP] kind 'cs3_hist' units 'cfs'}
+define D_MDCXXX_64_PA1 {alias variables_to_sum[i][ITP] kind 'cs3_hist' units 'cfs'}
