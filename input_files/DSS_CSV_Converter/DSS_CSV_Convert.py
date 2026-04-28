@@ -45,9 +45,6 @@ def process_batch(dss_file, output_folder, batch_paths, batch_index, total_batch
         # === APPLY ORIGINAL DATE FIXES ===
         times = times - pd.Timedelta(days=1)
 
-        feb29_mask = (times.month == 2) & (times.day == 29)
-        times = times.where(~feb29_mask, times - pd.Timedelta(days=1))
-
         # === NEW CUTOFF ===
         # Adjusted minimum timestamp allowed in output
         # (after date correction): 1921‑10‑31 00:00:00

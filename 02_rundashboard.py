@@ -22,7 +22,7 @@ pio.templates.default = 'plotly_white' # Making the plots background white - fee
 df_full = pd.read_csv('final_data.csv') # Script 01_producemergedcsv must be run first
 
 # Created a function that filters the data to what is selected (to use in the plotting callbacks)
-def filter_data(df, selected_variable, selected_months, selected_wyts, min_year, max_year, selected_units, dropna=True):
+def filter_data(df, selected_kind, selected_variable, selected_months, selected_wyts, min_year, max_year, selected_units, dropna=True):
     
     '''
     This function filters the dataframe to the selected variables, months, and water year types, converts to the selected units, and drops columns & rows if they are entirely NaN (if specified).
@@ -30,6 +30,9 @@ def filter_data(df, selected_variable, selected_months, selected_wyts, min_year,
     
     # Filtering to the selected variable
     df = df[df['Variable'] == selected_variable]
+
+    # Filter to first kind
+    df = df[df['Kind'] == selected_kind]
 
     # Creating a list of the columns which contain the values (these will be the historical, base, scenario value columns)
     model_columns = [col for col in df.columns if 'Value' in col]
@@ -337,7 +340,7 @@ def update_kind_variable_dropdowns(kind_value, variable_value):
         if not variable_value:
             return (all_kind_options, None, all_variable_options, None)
 
-        # Get the single kind for this variable (NOTE: THIS MIGHT NOT ALWAYS BE THE CASE, BUT IF THERE IS MORE THAN ONE IT'LL CAUSE OTHER ISSUES)
+        # Get the single kind for this variable (NOTE: THIS MIGHT NOT ALWAYS BE THE CASE, BUT IF THERE IS MORE THAN ONE IT'LL ONLY SHOW THE FIRST, NOT THE OPTIONS)
         kind = df_full.loc[df_full["Variable"] == variable_value, "Kind"].iloc[0]
         return (all_kind_options, kind,all_variable_options, variable_value)
 
@@ -370,6 +373,7 @@ def update_max_year_input(selected_variable):
     Output('av-ann-table', 'data'),
     Output('av-ann-table', 'columns'),
     Input('plot-button', 'n_clicks'),
+    Input('kind-dropdown', 'value'),
     Input('variable-dropdown', 'value'),
     Input('months-dropdown', 'value'),
     Input('wyts-dropdown', 'value'),
@@ -377,14 +381,14 @@ def update_max_year_input(selected_variable):
     Input('max-year-input', 'value'),
     Input('units-selected', 'value')
 )
-def average_annual_table(n_clicks, variable, months, wyts, min_year, max_year, units):
+def average_annual_table(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     # Won't calculate unless the plot button is clicked
     ctx = callback_context
     if not ctx.triggered or ctx.triggered[0]['prop_id'].split('.')[0] != 'plot-button':
         return html.H4(), [], []
 
     df, model_columns, months, wyts, units = filter_data(
-        df_full.copy(), variable, months, wyts, min_year, max_year, units, dropna=False
+        df_full.copy(), kind, variable, months, wyts, min_year, max_year, units, dropna=False
     )
 
     # Determine column label based on units
@@ -403,8 +407,8 @@ def average_annual_table(n_clicks, variable, months, wyts, min_year, max_year, u
         '% Diff from Base'
     ])
 
-    # Multiply flows by 1 (cfs) or volumes by 12
-    factor = 1 if units.lower() == "cfs" else 12
+    # Multiply flows and storage variables by 1 (cfs) or volumes by 12
+    factor = 1 if units.lower() == "cfs" or kind.lower() == "storage" else 12
 
     # Calculate the annual average of all the studies and save it with the name and value
     annual_averages = {}
@@ -460,6 +464,7 @@ def average_annual_table(n_clicks, variable, months, wyts, min_year, max_year, u
     Output('constraint-source-table', 'data'),
     Output('constraint-source-table', 'columns'),
     Input('plot-button', 'n_clicks'),
+    Input('kind-dropdown', 'value'),
     Input('variable-dropdown', 'value'),
     Input('months-dropdown', 'value'),
     Input('wyts-dropdown', 'value'),
@@ -467,13 +472,13 @@ def average_annual_table(n_clicks, variable, months, wyts, min_year, max_year, u
     Input('max-year-input', 'value'),
     Input('units-selected', 'value')
 )
-def hist_constraint_source(n_clicks, variable, months, wyts, min_year, max_year, units):
+def hist_constraint_source(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     # Won't calculate unless the plot button is clicked
     ctx = callback_context
     if not ctx.triggered or ctx.triggered[0]['prop_id'].split('.')[0] != 'plot-button':
         return html.H4(), [], []
 
-    df, model_columns, months, wyts, units = filter_data(df_full.copy(), variable, months, wyts, min_year, max_year, units, dropna=False) # Calling the function defined earlier
+    df, model_columns, months, wyts, units = filter_data(df_full.copy(), kind, variable, months, wyts, min_year, max_year, units, dropna=False) # Calling the function defined earlier
 
     # Get the historical dates, constraint, and data source to put into a table
     beg_date = df['Historical Beg. Date'].dropna().iloc[0] if not df['Historical Beg. Date'].dropna().empty else np.nan # If any of these are empty it will be NaN in the table
@@ -499,6 +504,7 @@ def hist_constraint_source(n_clicks, variable, months, wyts, min_year, max_year,
 @app.callback(
     Output('monthly-timeseries', 'figure'),
     Input('plot-button', 'n_clicks'),
+    Input('kind-dropdown', 'value'),
     Input('variable-dropdown', 'value'),
     Input('months-dropdown', 'value'),
     Input('wyts-dropdown', 'value'),
@@ -506,13 +512,13 @@ def hist_constraint_source(n_clicks, variable, months, wyts, min_year, max_year,
     Input('max-year-input', 'value'),
     Input('units-selected', 'value')
 )
-def plot_monthly_timeseries(n_clicks, variable, months, wyts, min_year, max_year, units):
+def plot_monthly_timeseries(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     # Won't plot unless the plot button is clicked
     ctx = callback_context
     if not ctx.triggered or ctx.triggered[0]['prop_id'].split('.')[0] != 'plot-button':
         return {}
 
-    df, model_columns, months, wyts, yaxis_title = filter_data(df_full.copy(), variable, None, None, min_year, max_year, units) # The monthly timeseries will not filter with months or wyts
+    df, model_columns, months, wyts, yaxis_title = filter_data(df_full.copy(), kind, variable, None, None, min_year, max_year, units) # The monthly timeseries will not filter with months or wyts
 
     fig = go.Figure()
 
@@ -532,6 +538,7 @@ def plot_monthly_timeseries(n_clicks, variable, months, wyts, min_year, max_year
 @app.callback(
     Output('monthly-averages', 'figure'),
     Input('plot-button', 'n_clicks'),
+    Input('kind-dropdown', 'value'),
     Input('variable-dropdown', 'value'),
     Input('months-dropdown', 'value'),
     Input('wyts-dropdown', 'value'),
@@ -539,12 +546,12 @@ def plot_monthly_timeseries(n_clicks, variable, months, wyts, min_year, max_year
     Input('max-year-input', 'value'),
     Input('units-selected', 'value')
 )
-def plot_monthly_averages(n_clicks, variable, months, wyts, min_year, max_year, units):
+def plot_monthly_averages(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     ctx = callback_context
     if not ctx.triggered or ctx.triggered[0]['prop_id'].split('.')[0] != 'plot-button':
         return {}
         
-    df, model_columns, months, wyts, yaxis_title = filter_data(df_full.copy(), variable, months, wyts, min_year, max_year, units)
+    df, model_columns, months, wyts, yaxis_title = filter_data(df_full.copy(), kind, variable, months, wyts, min_year, max_year, units)
 
     # Group by the month and take the average
     df_grouped = df.groupby('Month')[model_columns].mean().reset_index()
@@ -574,6 +581,7 @@ def plot_monthly_averages(n_clicks, variable, months, wyts, min_year, max_year, 
 @app.callback(
     Output('annual-averages', 'figure'),
     Input('plot-button', 'n_clicks'),
+    Input('kind-dropdown', 'value'),
     Input('variable-dropdown', 'value'),
     Input('months-dropdown', 'value'),
     Input('wyts-dropdown', 'value'),
@@ -581,13 +589,22 @@ def plot_monthly_averages(n_clicks, variable, months, wyts, min_year, max_year, 
     Input('max-year-input', 'value'),
     Input('units-selected', 'value')
 )
-def plot_annual_averages(n_clicks, variable, months, wyts, min_year, max_year, units):
+def plot_annual_averages(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     ctx = callback_context
     if not ctx.triggered or ctx.triggered[0]['prop_id'].split('.')[0] != 'plot-button':
         return {}
 
-    df, model_columns, months, wyts, yaxis_title = filter_data(df_full.copy(), variable, months, wyts, min_year, max_year, units)
+    df, model_columns, months, wyts, units = filter_data(df_full.copy(), kind, variable, months, wyts, min_year, max_year, units)
 
+    # Determine the plot title based on units
+    if units.lower() == "cfs":
+        avg_label = 'Average'
+    else:
+        avg_label = 'Annual Average'
+
+    # Multiply flows and storage variables by 1 (cfs) or volumes by 12
+    factor = 1 if units.lower() == "cfs" or kind.lower() == "storage" else 12
+    
     # Group by the water year and take the average
     df_grouped = df.groupby('Water Year')[model_columns].mean().reset_index()
     
@@ -595,13 +612,13 @@ def plot_annual_averages(n_clicks, variable, months, wyts, min_year, max_year, u
 
     for col in model_columns:
         study_name = col.replace(' Value', '')
-        df_grouped[col] = df_grouped[col] * 12 # Multiply by 12 to get the annual average
+        df_grouped[col] = df_grouped[col] * factor # Multiply by 1 or 12 to get the annual average
         fig.add_trace(go.Scatter(x=df_grouped['Water Year'], y=df_grouped[col], mode='lines+markers', name=study_name, hovertemplate='%{x}, %{y:.2f}'))
     
     fig.update_layout(
-        title=f"<span style='font-size:20px'><b>{variable} Annual Averages</b></span><br><span style='font-size:14px'>Months: {months}, Water Year Types: {wyts}, Water Years: {min_year}-{max_year}</span>",
+        title=f"<span style='font-size:20px'><b>{variable} {avg_label}</b></span><br><span style='font-size:14px'>Months: {months}, Water Year Types: {wyts}, Water Years: {min_year}-{max_year}</span>",
         xaxis_title='Water Year',
-        yaxis_title=yaxis_title,
+        yaxis_title=units,
         legend_title='Study'
     )
     
@@ -610,6 +627,7 @@ def plot_annual_averages(n_clicks, variable, months, wyts, min_year, max_year, u
 @app.callback(
     Output('exceedance-plot', 'figure'),
     Input('plot-button', 'n_clicks'),
+    Input('kind-dropdown', 'value'),
     Input('variable-dropdown', 'value'),
     Input('months-dropdown', 'value'),
     Input('wyts-dropdown', 'value'),
@@ -617,12 +635,12 @@ def plot_annual_averages(n_clicks, variable, months, wyts, min_year, max_year, u
     Input('max-year-input', 'value'),
     Input('units-selected', 'value')
 )
-def plot_monthly_exceedances(n_clicks, variable, months, wyts, min_year, max_year, units):
+def plot_monthly_exceedances(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     ctx = callback_context
     if not ctx.triggered or ctx.triggered[0]['prop_id'].split('.')[0] != 'plot-button':
         return {}
 
-    df, model_columns, months, wyts, yaxis_title = filter_data(df_full.copy(), variable, months, wyts, min_year, max_year, units)
+    df, model_columns, months, wyts, yaxis_title = filter_data(df_full.copy(), kind, variable, months, wyts, min_year, max_year, units)
 
     fig = go.Figure()
 
@@ -644,6 +662,7 @@ def plot_monthly_exceedances(n_clicks, variable, months, wyts, min_year, max_yea
 @app.callback(
     Output('wyt-index-sac', 'figure'),
     Input('plot-button', 'n_clicks'),
+    Input('kind-dropdown', 'value'),
     Input('variable-dropdown', 'value'),
     Input('months-dropdown', 'value'),
     Input('wyts-dropdown', 'value'),
@@ -651,13 +670,13 @@ def plot_monthly_exceedances(n_clicks, variable, months, wyts, min_year, max_yea
     Input('max-year-input', 'value'),
     Input('units-selected', 'value')
 )
-def plot_wyt_sac(n_clicks, variable, months, wyts, min_year, max_year, units):
+def plot_wyt_sac(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     ctx = callback_context
     if not ctx.triggered or ctx.triggered[0]['prop_id'].split('.')[0] != 'plot-button':
         return {}
 
-    df, model_columns, months, wyts, yaxis_title = filter_data(df_full, variable, months, wyts, min_year, max_year, units)
-    df_avg, model_columns_avg, months_avg, wyts_avg, yaxis_title_avg = filter_data(df_full, variable, None, None, min_year, max_year, units) # The average bar won't filter for months or WYTs
+    df, model_columns, months, wyts, yaxis_title = filter_data(df_full, kind, variable, months, wyts, min_year, max_year, units)
+    df_avg, model_columns_avg, months_avg, wyts_avg, yaxis_title_avg = filter_data(df_full, kind, variable, None, None, min_year, max_year, units) # The average bar won't filter for months or WYTs
 
     wyt_order = ['W', 'AN', 'BN', 'D', 'C']
     wyt_columns = [col for col in df.columns if 'WYT SAC' in col]
@@ -703,6 +722,7 @@ def plot_wyt_sac(n_clicks, variable, months, wyts, min_year, max_year, units):
 @app.callback(
     Output('wyt-index-sjr', 'figure'),
     Input('plot-button', 'n_clicks'),
+    Input('kind-dropdown', 'value'),
     Input('variable-dropdown', 'value'),
     Input('months-dropdown', 'value'),
     Input('wyts-dropdown', 'value'),
@@ -710,13 +730,13 @@ def plot_wyt_sac(n_clicks, variable, months, wyts, min_year, max_year, units):
     Input('max-year-input', 'value'),
     Input('units-selected', 'value')
 )
-def plot_wyt_sjr(n_clicks, variable, months, wyts, min_year, max_year, units):
+def plot_wyt_sjr(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     ctx = callback_context
     if not ctx.triggered or ctx.triggered[0]['prop_id'].split('.')[0] != 'plot-button':
         return {}
 
-    df, model_columns, months, wyts, yaxis_title = filter_data(df_full, variable, months, wyts, min_year, max_year, units)
-    df_avg, model_columns_avg, months_avg, wyts_avg, yaxis_title_avg = filter_data(df_full, variable, None, None, min_year, max_year, units)
+    df, model_columns, months, wyts, yaxis_title = filter_data(df_full, kind, variable, months, wyts, min_year, max_year, units)
+    df_avg, model_columns_avg, months_avg, wyts_avg, yaxis_title_avg = filter_data(df_full, kind, variable, None, None, min_year, max_year, units)
 
     wyt_order = ['W', 'AN', 'BN', 'D', 'C']
     wyt_columns = [col for col in df.columns if 'WYT SJR' in col]
@@ -762,6 +782,7 @@ def plot_wyt_sjr(n_clicks, variable, months, wyts, min_year, max_year, units):
 @app.callback(
     Output('dummy-output', 'children'),
     Input('download-button', 'n_clicks'),
+    State('kind-dropdown', 'value'),
     State('variable-dropdown', 'value'),
     State('months-dropdown', 'value'),
     State('wyts-dropdown', 'value'),
@@ -769,7 +790,7 @@ def plot_wyt_sjr(n_clicks, variable, months, wyts, min_year, max_year, units):
     State('max-year-input', 'value'),
     State('units-selected', 'value')
 )
-def download_data(n_clicks, variable, months, wyts, min_year, max_year, units):
+def download_data(n_clicks, kind, variable, months, wyts, min_year, max_year, units):
     
     '''
     This function will run if the download button is clicked on the dashboard. It loops through the various plots and saves their data as CSVs (repeating the same calculations), rounded to 3 decimals.
@@ -785,7 +806,7 @@ def download_data(n_clicks, variable, months, wyts, min_year, max_year, units):
     if not os.path.exists('downloaded_data'):
         os.makedirs('downloaded_data')
 
-    df, model_columns, months_na, wyts, units = filter_data(df_full.copy(), variable, months, wyts, min_year, max_year, units, dropna=False)
+    df, model_columns, months_na, wyts, units = filter_data(df_full.copy(), kind, variable, months, wyts, min_year, max_year, units, dropna=False)
 
     df = df.drop(columns=['Historical Beg. Date', 'Historical End Date', 'Historical Constraint', 'Historical Source'])
 
