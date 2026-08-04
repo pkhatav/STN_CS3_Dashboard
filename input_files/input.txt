@@ -1,4 +1,3 @@
 Model Name,File Location,Type,Historical or Planning Model
-Danube CC50,data/DCR2023_DV_9.3.1_Danube_cc50_v1.8_20250812_finalfv.csv,Base,Historical
-Danube CC50,data/DCR2023_DV_9.3.1_Danube_cc50_v1.8_20250812_finalfv - Copy.csv,Scenario,Historical
+Hist,data/CS3HIST_Mekong_v1.3.3_DV.csv,Base,Historical
 Historical Data,data\historical_data.csv,Historical,Historical

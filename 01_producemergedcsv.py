@@ -35,7 +35,8 @@ FV_PLAN = "input_files/fv/planning_model_variables.fv"
 def update_input(input_file):
     """
     Add the historical-data CSV into the input file (if present & missing)
-    and convert any .DSS input files to CSV using the appropriate FV file.
+    Convert any .DSS input files to CSV using the appropriate FV file
+    Add the hist WYT data to the models if they are hist models
     """
     input_file = Path(input_file)
     txt = pd.read_csv(input_file)
@@ -58,7 +59,7 @@ def update_input(input_file):
             final_txt = txt.copy()
     else:
         final_txt = txt.copy()
-
+    
     # Convert any .dss entries to .csv (not expected for your current 3-CSV case, but kept for robustness)
     for idx, row in final_txt.iterrows():
         f = str(row['File Location']).strip()
@@ -68,8 +69,41 @@ def update_input(input_file):
             convert_to_csv(f, fv_file)
             final_txt.loc[idx, 'File Location'] = f[:-4] + ".csv"
 
-    final_txt.to_csv(input_file, index=False)
+    # Add hist WYT data if the model is a historical model
+    hist_df = None
+    if HIST_CSV_PATH.exists():
+        hist_df = pd.read_csv(HIST_CSV_PATH, **READ_KW)
+    
+    for idx, row in final_txt.iterrows():
+        if (
+            hist_df is not None
+            and str(row.get('Historical or Planning Model', '')).strip().lower() == 'historical'
+        ):
+            f = str(row['File Location']).strip()
+    
+            # Skip the historical data source file itself
+            if Path(f).resolve() == HIST_CSV_PATH.resolve():
+                continue
+    
+            df = pd.read_csv(f, **READ_KW)
+    
+            existing_vars = set(df['Variable'].astype(str).str.strip())
+    
+            # Only add if neither WYT variable is already present
+            if not {'WYT_SAC_', 'WYT_SJR_'}.issubset(existing_vars):
+    
+                wyt_rows = hist_df.loc[
+                    hist_df['Variable'].isin(['WYT_SAC_', 'WYT_SJR_']),
+                    ['Date_Time', 'Variable', 'Value']
+                ]
 
+                wyt_rows['Kind'] = 'wateryeartype'
+                wyt_rows['Units'] = 'none'
+    
+                df = pd.concat([df, wyt_rows], ignore_index=True)
+                df.to_csv(f, index=False)
+
+    final_txt.to_csv(input_file, index=False)
 
 def add_val_variables(input_file):
     """
@@ -205,15 +239,27 @@ def filter_and_merge_csvs(input_file):
 
     # Build SAC map
     if (merged_df['Variable'] == 'WYT_SAC_').any():
-        wyt_sac = (merged_df.loc[merged_df['Variable'] == 'WYT_SAC_', ['Date'] + model_val_cols]
-                   .drop_duplicates('Date').set_index('Date'))
+        wyt_sac = (
+            merged_df.loc[
+                merged_df['Variable'] == 'WYT_SAC_',
+                ['Date'] + model_val_cols
+            ]
+            .groupby('Date', as_index=True)
+            .first()
+        )
     else:
         wyt_sac = None
 
     # Build SJR map
     if (merged_df['Variable'] == 'WYT_SJR_').any():
-        wyt_sjr = (merged_df.loc[merged_df['Variable'] == 'WYT_SJR_', ['Date'] + model_val_cols]
-                   .drop_duplicates('Date').set_index('Date'))
+        wyt_sjr = (
+            merged_df.loc[
+                merged_df['Variable'] == 'WYT_SJR_',
+                ['Date'] + model_val_cols
+            ]
+            .groupby('Date', as_index=True)
+            .first()
+        )
     else:
         wyt_sjr = None
 

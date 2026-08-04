@@ -1,5 +1,5 @@
-
 import os
+import shutil
 import pandas as pd
 from itertools import islice
 from multiprocessing import Process
@@ -90,7 +90,10 @@ def convert_to_csv(
 
     """Convert DSS→CSV using RasCommander, matching the original DSSVue CSV format."""
 
-    os.makedirs(output_folder, exist_ok=True)
+    if os.path.isdir(output_folder):
+        shutil.rmtree(output_folder) # delete old output timeseries first
+    
+    os.makedirs(output_folder)
 
     print("=== RASCommander Parallel DSS Extractor ===")
 
@@ -115,10 +118,15 @@ def convert_to_csv(
         catalog[col] = catalog[col].astype(str).str.strip()
 
     # ------------------------------------------------------------
-    # 3. Filter only Part D == 01JAN1920
+    # 3. Filter only Part D == 01JAN1920 (planning), D == 01JAN2000 (hist)
     # ------------------------------------------------------------
-    catalog = catalog[catalog["D"].str.upper() == "01JAN1920"]
-    print(f"Catalog after D-part filter: {len(catalog)} rows")
+    
+    if fv_file == "input_files/fv/planning_model_variables.fv":
+        catalog = catalog[catalog["D"].str.upper() == "01JAN1920"]
+        print(f"Catalog after D-part filter: {len(catalog)} rows")
+    #elif fv_file == "input_files/fv/hist_model_variables.fv":
+        #catalog = catalog[catalog["D"].str.upper() == "01JAN2000"]
+        #print(f"Catalog after D-part filter: {len(catalog)} rows")
 
     # ------------------------------------------------------------
     # 4. Match only by Part B (your original workflow)
