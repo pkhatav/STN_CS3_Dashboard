@@ -48,11 +48,11 @@ def get_historical_data(excel_file):
             units = 'cfs'
             variable = col[df.columns[0].index('Name')]
             value = (df[col])/(date.str.split('-').str[2].str.split(' ').str[0].astype(int) *24*60*60/(220*22*9*1000))
-        elif 'return_flow' in kind and units == 'taf':
+        elif 'return-flow' in kind and units == 'taf':
             units = 'cfs'
             variable = col[df.columns[0].index('Name')]
             value = (df[col])/(date.str.split('-').str[2].str.split(' ').str[0].astype(int) *24*60*60/(220*22*9*1000))
-        elif 'river_spills' in kind and units == 'taf':
+        elif 'river-spills' in kind and units == 'taf':
             units = 'cfs'
             variable = col[df.columns[0].index('Name')]
             value = (df[col])/(date.str.split('-').str[2].str.split(' ').str[0].astype(int) *24*60*60/(220*22*9*1000))

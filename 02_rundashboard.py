@@ -59,33 +59,46 @@ def filter_data(df, selected_kind, selected_variable, selected_months, selected_
         df_new_parts = []
 
         # For each selected WYT, loops through each model, makes a copy of the data equal to that value, and combines all the copies into one dataframe
-        for selected_wyt in selected_wyts:  # i.e. SAC-C
-            loc = selected_wyt.split('-')[0]  # SAC or SJV
-            val = selected_wyt.split('-')[1]  # C, D, etc
-            loc_cols = [c.replace('Value', f'WYT {loc}') for c in model_columns]  # (MODEL1) WYT SAC/SJR, (MODEL2) WYT SAC/SJR
-            for loc_col in loc_cols:
-                val_col = loc_col.replace(f'WYT {loc}', 'Value')  # (MODEL) Value
+        for selected_wyt in selected_wyts: # i.e. SAC-C
+            loc = selected_wyt.split('-')[0]  # SAC or SJR
+            val = selected_wyt.split('-')[1]  # W, AN, BN, D, or C
+    
+            for val_col in model_columns:
+                loc_col = val_col.replace('Value', f'WYT {loc}') # (MODEL1) WYT SAC/SJR, (MODEL2) WYT SAC/SJR
+    
+                # Skip only this model when the requested WYT column does not exist or is completely empty
+                if (
+                    val_col not in df.columns
+                    or loc_col not in df.columns
+                    or df[loc_col].dropna().empty
+                ):
+                    continue
 
                 # Sets the original dataframes values to NaN except for the model's selected WYT
                 mask = df[loc_col].eq(val)
+    
+                # Skip if this model has no rows for the selected WYT
+                if not mask.any():
+                    continue
+    
                 df_wyt = df.copy()
+    
+                # Blank all model values, then restore only this model's values where its WYT matches
                 df_wyt[model_columns] = np.nan
                 df_wyt[val_col] = df[val_col].where(mask)
-
-                # Drops any rows where all models have NaN values
+    
                 df_wyt = df_wyt.dropna(subset=model_columns, how='all')
-                df_new_parts.append(df_wyt)
-        
-        df = pd.concat(df_new_parts, ignore_index=True) # concats each model + selected WYT's new dataframe with NaN values in the other model's columns (there will be duplicate dates)
-        df = df.drop_duplicates(subset=model_columns + ['Date'], keep='first').reset_index(drop=True) # drops any rows that have the exact same dates and values
-
+    
+                if not df_wyt.empty:
+                    df_new_parts.append(df_wyt)
+                    
         # Combines rows that have the same date by taking each of the model's values for that date and combining them into one row with no NaN values
-        df = (
-            df
-            .sort_values("Date")
-            .groupby("Date", as_index=False)
-            .agg("first")
-        )
+        if df_new_parts:
+            df = pd.concat(df_new_parts, ignore_index=True)
+            df = (df.sort_values("Date").groupby("Date", as_index=False).agg("first"))
+        else:
+            # Return an empty dataframe with the same columns
+            df = df.iloc[0:0].copy()
 
     # Converting to the selected units
     if selected_units == 'cfs' and df['Units'].iloc[0] == 'taf':
@@ -691,10 +704,13 @@ def plot_wyt_sac(n_clicks, kind, variable, months, wyts, min_year, max_year, uni
         grouped_df = {
             col: df.groupby(col.replace('Value', 'WYT SAC'))[col].mean().reset_index()
             for col in model_columns
+            if col.replace('Value', 'WYT SAC') in df.columns
         }
         
         # Creates a dataframe with the WYT and average value for each model_column
         for col in model_columns:
+            if col not in grouped_df:
+                continue
             wyt_col = col.replace('Value', 'WYT SAC')
             df_grouped = grouped_df[col] # Calls the dataframe from the dictionary
             df_grouped = df_grouped.set_index(wyt_col).reindex(wyt_order).reset_index() # Reorders the data to match the wyt_order (wet to dry)
@@ -751,10 +767,13 @@ def plot_wyt_sjr(n_clicks, kind, variable, months, wyts, min_year, max_year, uni
         grouped_df = {
             col: df.groupby(col.replace('Value', 'WYT SJR'))[col].mean().reset_index()
             for col in model_columns
+            if col.replace('Value', 'WYT SJR') in df.columns
         }
         
         # Creates a dataframe with the WYT and average value for each model_column
         for col in model_columns:
+            if col not in grouped_df:
+                continue
             wyt_col = col.replace('Value', 'WYT SJR')
             df_grouped = grouped_df[col] # Calls the dataframe from the dictionary
             df_grouped = df_grouped.set_index(wyt_col).reindex(wyt_order).reset_index() # Reorders the data to match the wyt_order (wet to dry)
@@ -852,22 +871,27 @@ def download_data(n_clicks, kind, variable, months, wyts, min_year, max_year, un
     else:
         for col in model_columns:
             wyt_sac_col = col.replace('Value', 'WYT SAC')
-            sac_avg = df.groupby(wyt_sac_col)[col].mean().reset_index()
-            sac_df = sac_avg.set_index(wyt_sac_col).reindex(wyt_order).reset_index()
-            sac_df[col] = sac_df[col].apply(lambda x: None if pd.isna(x) else x)
-            sac_df_grouped = pd.concat([sac_df_grouped, sac_df[[col]]], axis=1)
-    
+            if wyt_sac_col in df.columns:
+                sac_avg = df.groupby(wyt_sac_col)[col].mean().reset_index()
+                sac_df = sac_avg.set_index(wyt_sac_col).reindex(wyt_order).reset_index()
+                sac_df[col] = sac_df[col].apply(lambda x: None if pd.isna(x) else x)
+                sac_df_grouped = pd.concat([sac_df_grouped, sac_df[[col]]], axis=1)
+        
             wyt_sjr_col = col.replace('Value', 'WYT SJR')
-            sjr_avg = df.groupby(wyt_sjr_col)[col].mean().reset_index()
-            sjr_df = sjr_avg.set_index(wyt_sjr_col).reindex(wyt_order).reset_index()
-            sjr_df[col] = sjr_df[col].apply(lambda x: None if pd.isna(x) else x)
-            sjr_df_grouped = pd.concat([sjr_df_grouped, sjr_df[[col]]], axis=1)
+            if wyt_sjr_col in df.columns:
+                sjr_avg = df.groupby(wyt_sjr_col)[col].mean().reset_index()
+                sjr_df = sjr_avg.set_index(wyt_sjr_col).reindex(wyt_order).reset_index()
+                sjr_df[col] = sjr_df[col].apply(lambda x: None if pd.isna(x) else x)
+                sjr_df_grouped = pd.concat([sjr_df_grouped, sjr_df[[col]]], axis=1)
             
         sac_df_grouped.round(3).to_csv('downloaded_data/sacramento_wyt_averages.csv', index=False)
         sjr_df_grouped.round(3).to_csv('downloaded_data/san_joaquin_wyt_averages.csv', index=False)
+
+        sac_model_columns = [col for col in model_columns if col in sac_df_grouped.columns]
+        sjr_model_columns = [col for col in model_columns if col in sjr_df_grouped.columns]
             
-        create_excel_with_chart(sac_df_grouped, 'downloaded_data/sacramento_wyt_averages_chart.xlsx', variable, 'WYT', f'{variable} Sacramento Valley Index Average', 'column', model_columns, months_na, wyts, min_year, max_year, units)
-        create_excel_with_chart(sjr_df_grouped, 'downloaded_data/san_joaquin_wyt_averages_chart.xlsx', variable, 'WYT', f'{variable} San Joaquin Valley Index Average', 'column', model_columns, months_na, wyts, min_year, max_year, units)
+        create_excel_with_chart(sac_df_grouped, 'downloaded_data/sacramento_wyt_averages_chart.xlsx', variable, 'WYT', f'{variable} Sacramento Valley Index Average', 'column', sac_model_columns, months_na, wyts, min_year, max_year, units)
+        create_excel_with_chart(sjr_df_grouped, 'downloaded_data/san_joaquin_wyt_averages_chart.xlsx', variable, 'WYT', f'{variable} San Joaquin Valley Index Average', 'column', sjr_model_columns, months_na, wyts, min_year, max_year, units)
     
 if __name__ == '__main__':
     app.run(debug=True)

@@ -84,7 +84,7 @@ def process_batch(dss_file, output_folder, batch_paths, batch_index, total_batch
 def convert_to_csv(
         dss_file,
         fv_file,
-        output_folder="output_timeseries",
+        output_folder="data/output_timeseries",
         batch_size=500,
         parallel_jobs=8):
 

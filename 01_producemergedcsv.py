@@ -3,7 +3,11 @@ import pandas as pd
 import numpy as np
 import ast
 from pathlib import Path
+import csv
+from datetime import datetime
 from input_files.DSS_CSV_Converter.DSS_CSV_Convert import convert_to_csv
+from input_files.WEAP_CalSim.WEAP_FavExp import *
+from input_files.WEAP_CalSim.WEAP_to_CalSim import *
 
 # ---- Common read options to stop DtypeWarning and speed things up ----
 # We only keep the columns we actually need.
@@ -31,11 +35,14 @@ HIST_CSV_PATH = Path("data/historical_data.csv")
 FV_HIST = "input_files/fv/hist_model_variables.fv"
 FV_PLAN = "input_files/fv/planning_model_variables.fv"
 
+SAC_WYT_CSV = 'data/WEAP_Favorites_Exports/Sac_WYT.csv'
+SJR_WYT_CSV = 'data/WEAP_Favorites_Exports/SJR_WYT.csv'
 
 def update_input(input_file):
     """
     Add the historical-data CSV into the input file (if present & missing)
     Convert any .DSS input files to CSV using the appropriate FV file
+    Exports any WEAP favorites and converts into CSV in data folder
     Add the hist WYT data to the models if they are hist models
     """
     input_file = Path(input_file)
@@ -45,14 +52,14 @@ def update_input(input_file):
 
     historical_data = {
         'Model Name': 'Historical Data',
-        'File Location': hist_data,
+        'File Location or WEAP Area': hist_data,
         'Type': 'Historical',
-        'Historical or Planning Model': 'Historical'
+        'Study': 'Historical'
     }
 
     # Add historical row if file exists and input list doesn't already have it
     if HIST_CSV_PATH.exists():
-        file_loc_list = txt['File Location'].astype(str).str.strip().tolist() if 'File Location' in txt.columns else []
+        file_loc_list = txt['File Location or WEAP Area'].astype(str).str.strip().tolist() if 'File Location or WEAP Area' in txt.columns else []
         if hist_data not in file_loc_list:
             final_txt = pd.concat([txt, pd.DataFrame([historical_data])], ignore_index=True)
         else:
@@ -60,14 +67,35 @@ def update_input(input_file):
     else:
         final_txt = txt.copy()
     
-    # Convert any .dss entries to .csv (not expected for your current 3-CSV case, but kept for robustness)
+    # Convert any .dss entries to .csv 
     for idx, row in final_txt.iterrows():
-        f = str(row['File Location']).strip()
+        f = str(row['File Location or WEAP Area']).strip()
         if f.lower().endswith(".dss"):
-            fv_type = str(row.get('Historical or Planning Model', '')).strip().lower()
+            fv_type = str(row.get('Study', '')).strip().lower()
             fv_file = FV_HIST if fv_type == 'historical' else FV_PLAN
             convert_to_csv(f, fv_file)
-            final_txt.loc[idx, 'File Location'] = f[:-4] + ".csv"
+            final_txt.loc[idx, 'File Location or WEAP Area'] = f[:-4] + ".csv"
+
+    # Export WEAP models to .csv (see input_files/WEAP_CalSim for more info)
+    for idx, row in final_txt.iterrows():
+        if (
+            str(row.get('Study', '')).strip().lower() in {'sacwam', 'sjwam'}
+            and not str(row.get('File Location or WEAP Area', '')).strip().lower().endswith('.csv')
+        ):
+            weap_area = str(row['File Location or WEAP Area']).strip()
+            weap_model = str(row['Study']).strip().lower()
+            output_file = "data/" + weap_area + ".csv"
+            if os.path.exists(output_file): # if this weap export already exists, it won't re-export it
+                print(
+                f"WEAP output CSV file already exists, skipping export and using existing file:\n"
+                f" {output_file}\n"
+                f"If you would like to create a new CSV, rename or delete the existing CSV file, then rerun this script."
+                )
+                continue
+            export_weap_favorites(weap_area) # exports weap favorites from the model, must have weap open
+            create_weap_csv() # creates csv from specific favorite files
+            save_as_calsim_format(output_file, weap_model, SJR_WYT_CSV, SAC_WYT_CSV) # saves the csv in calsim format (maps variables)
+            final_txt.loc[idx, 'File Location or WEAP Area'] = output_file
 
     # Add hist WYT data if the model is a historical model
     hist_df = None
@@ -77,9 +105,9 @@ def update_input(input_file):
     for idx, row in final_txt.iterrows():
         if (
             hist_df is not None
-            and str(row.get('Historical or Planning Model', '')).strip().lower() == 'historical'
+            and str(row.get('Study', '')).strip().lower() in {'historical'} 
         ):
-            f = str(row['File Location']).strip()
+            f = str(row['File Location or WEAP Area']).strip()
     
             # Skip the historical data source file itself
             if Path(f).resolve() == HIST_CSV_PATH.resolve():
@@ -100,7 +128,7 @@ def update_input(input_file):
                 wyt_rows['Kind'] = 'wateryeartype'
                 wyt_rows['Units'] = 'none'
     
-                df = pd.concat([df, wyt_rows], ignore_index=True)
+                df = pd.concat([df, wyt_rows], ignore_index=True) # sets any missing columns to NaN
                 df.to_csv(f, index=False)
 
     final_txt.to_csv(input_file, index=False)
@@ -109,73 +137,195 @@ def add_val_variables(input_file):
     """
     For each CSV listed in input_file, compute validation variables
     defined in input_files/val_variables.csv and append them to each CSV.
+    Skips the validation variable if any of the variables to sum are missing.
     """
-    new_vars = pd.read_csv('input_files/val_variables.csv')
+
+    new_vars = pd.read_csv("input_files/val_variables.csv")
+
+    parsed_definitions = []
+
+    # Build validation variables
+    for row_number, vrow in new_vars.iterrows():
+        variables_to_sum = ast.literal_eval(str(vrow["variables_to_sum"]))
+        coefficients = ast.literal_eval(str(vrow["coefficients"]))
+
+        parsed_definitions.append(
+            {
+                "variable_name": vrow["variable_name"],
+                "kind": vrow["kind"],
+                "variables_to_sum": list(variables_to_sum),
+                "coefficients": list(coefficients),
+            }
+        )
+
     txt = pd.read_csv(input_file)
 
-    for _, row in txt.iterrows():
-        f = str(row['File Location']).strip()
+    for _, file_row in txt.iterrows():
+        f = str(file_row['File Location or WEAP Area']).strip()
         df = pd.read_csv(f, **READ_KW)
 
-        # Coerce numeric after read
-        df['Value'] = pd.to_numeric(df['Value'], errors='coerce')
+        # Ensure Value is numeric
+        df["Value"] = pd.to_numeric(df["Value"], errors="coerce")
 
         # Normalize Units
-        df['Units'] = df['Units'].str.lower().str.strip()
+        df["Units"] = (df["Units"].astype("string").str.lower().str.strip())
 
-        # Conversion factor c (kept as you had it, but using parsed datetime)
+        # Calculate c once for every original row
         # Using the day of month from Date_Time
-        day = df['Date_Time'].dt.day.fillna(1).astype(int)
-        df['c'] = day * 24 * 60 * 60 / (220 * 22 * 9 * 1000)  # consider naming the denominator constant
+        day = df["Date_Time"].dt.day.fillna(1).astype(int)
+        df["c"] = (day * 24 * 60 * 60 / (220 * 22 * 9 * 1000))
 
-        # Build validation variables
-        for __, vrow in new_vars.iterrows():
-            try:
-                variables_to_sum = ast.literal_eval(vrow['variables_to_sum'])
-                coefficients = ast.literal_eval(vrow['coefficients'])
-            except Exception:
+        variable_lookup = {
+            variable: group.copy()
+            for variable, group in df.groupby(
+                "Variable",
+                sort=False,
+                dropna=False,
+            )
+        }
+
+        existing_vars = set(variable_lookup)
+
+        # Store new rows and concatenate once
+        appended_dfs = []
+
+        for definition in parsed_definitions:
+            variable_name = definition["variable_name"]
+            kind = definition["kind"]
+            variables_to_sum = definition["variables_to_sum"]
+            coefficients = definition["coefficients"]
+
+            # Skip if validation variable already exists in the df
+            if variable_name in existing_vars:
                 continue
 
-            variable_name = vrow['variable_name']
-            kind = vrow['kind']
+            # Skip if any required variable to sum is missing
+            missing_vars = [
+                variable
+                for variable in variables_to_sum
+                if variable not in existing_vars
+            ]
 
-            # Skip if already present
-            if 'Variable' in df.columns and variable_name in df['Variable'].unique():
+            if missing_vars:
                 continue
 
-            # Base var
+            # Check for duplicate Date_Time values within each variable
+            duplicate_inputs = []
+
+            for variable in variables_to_sum:
+                variable_df = variable_lookup[variable]
+
+                duplicate_mask = variable_df["Date_Time"].duplicated(keep=False)
+
+                if duplicate_mask.any():
+                    duplicate_inputs.append(variable)
+
+            if duplicate_inputs:
+                print(
+                    f"Skipping validation variable {variable_name}: duplicate Date_Time "
+                    f"values found for {duplicate_inputs}"
+                )
+                continue
+
             base_var = variables_to_sum[0]
-            base_coef = coefficients[0]
-            df_final = df[df['Variable'] == base_var].copy().reset_index(drop=True)
-            if df_final.empty:
+
+            # Keep all metadata from the first/base variable
+            df_final = (
+                variable_lookup[base_var]
+                .copy()
+                .set_index("Date_Time", drop=False)
+            )
+
+            # Find dates shared by every variable
+            common_dates = df_final.index
+
+            for variable in variables_to_sum[1:]:
+                variable_dates = pd.Index(
+                    variable_lookup[variable]["Date_Time"]
+                )
+
+                common_dates = common_dates.intersection(
+                    variable_dates,
+                    sort=False,
+                )
+
+            if len(common_dates) == 0:
                 continue
 
-            df_final['Value'] = df_final['Value'] * (df_final['c'] if base_coef == 'c' else int(base_coef))
+            # Retain only shared dates
+            df_final = df_final.loc[common_dates].copy()
 
-            # Sum the rest
-            for var, coef in zip(variables_to_sum[1:], coefficients[1:]):
-                temp_df = df[df['Variable'] == var].copy().reset_index(drop=True)
-                if temp_df.empty:
-                    continue
-                temp_df['Value'] = temp_df['Value'] * (temp_df['c'] if coef == 'c' else int(coef))
-                # Align by index (dates are aligned because we filtered per variable)
-                df_final['Value'] = df_final['Value'] + temp_df['Value']
+            # Start calculated result at zero
+            calculated_value = pd.Series(
+                0.0,
+                index=df_final.index,
+                dtype="float64",
+            )
 
-            df_final['Kind'] = kind
-            df_final['Variable'] = variable_name
+            uses_c = False
 
-            # Null historical-only fields if they exist
-            for col in ['Historical Constraint', 'Historical Source']:
-                if col in df_final.columns:
-                    df_final[col] = np.nan
+            # Add each variable to sum
+            for variable, coefficient in zip(
+                variables_to_sum,
+                coefficients,
+            ):
+                source = (
+                    variable_lookup[variable]
+                    .set_index("Date_Time")
+                    .loc[common_dates]
+                )
+                
+                source_value = source["Value"].astype(float)
 
-            if 'c' in coefficients:
-                df_final['Units'] = 'taf'
+                if isinstance(coefficient, str):
+                    coefficient = coefficient.strip()
 
-            df = pd.concat([df, df_final], ignore_index=True)
+                if coefficient == "c":
+                    calculated_value = (
+                        calculated_value
+                        + source_value * source["c"]
+                    )
+                    uses_c = True
+                else:
+                    numeric_coefficient = float(coefficient)
+                    calculated_value = (
+                        calculated_value
+                        + source_value * numeric_coefficient
+                    )
 
-        # Clean up & save
-        df.drop(columns='c', inplace=True)
+            if calculated_value is None:
+                continue
+
+            df_final["Value"] = calculated_value
+            df_final["Kind"] = kind
+            df_final["Variable"] = variable_name
+
+            for column in [
+                "Historical Constraint",
+                "Historical Source",
+            ]:
+                if column in df_final.columns:
+                    df_final[column] = np.nan
+
+            if uses_c:
+                df_final["Units"] = "taf"
+
+            df_final.reset_index(drop=True, inplace=True)
+
+            appended_dfs.append(df_final)
+
+            # Add the new validation variable to the lookup
+            variable_lookup[variable_name] = df_final.copy()
+            existing_vars.add(variable_name)
+
+        if appended_dfs:
+            df = pd.concat(
+                [df, *appended_dfs],
+                ignore_index=True,
+                sort=False,
+            )
+
+        df.drop(columns=["c"], inplace=True, errors="ignore")
         df.to_csv(f, index=False)
 
 
@@ -185,7 +335,7 @@ def filter_and_merge_csvs(input_file):
     - Keeps rows with keys (Variable, Date_Time, Kind, Units)
     - Renames each model's Value column to '{Type}: {Model Name} Value'
     - Adds Water Year and Month
-    - Adds per-model WYT SAC/SJR via MAP (no row multiplication)
+    - Adds per-model WYT SAC/SJR via MAP
     """
     txt = pd.read_csv(input_file)
 
@@ -194,7 +344,7 @@ def filter_and_merge_csvs(input_file):
 
     # First model setup
     first_model_name = txt.loc[0, 'Model Name']
-    first_file = str(txt.loc[0, 'File Location']).strip()
+    first_file = str(txt.loc[0, 'File Location or WEAP Area']).strip()
     first_type_run = txt.loc[0, 'Type']
     first_model_label = f"{first_type_run}: {first_model_name}"
 
@@ -202,7 +352,7 @@ def filter_and_merge_csvs(input_file):
     other_models = []
     for _, row in txt.iloc[1:].iterrows():
         model_label = f"{row['Type']}: {row['Model Name']}"
-        file_path = str(row['File Location']).strip()
+        file_path = str(row['File Location or WEAP Area']).strip()
         other_df = pd.read_csv(file_path, **READ_KW)
         other_df['Value'] = pd.to_numeric(other_df['Value'], errors='coerce')
         other_df['Units'] = other_df['Units'].str.lower().str.strip()
@@ -234,7 +384,7 @@ def filter_and_merge_csvs(input_file):
 
     final_df = merged_df.copy()
 
-    # Prepare WYT mappings (Date -> per-model WYT value) without row multiplication
+    # Prepare WYT mappings (Date -> per-model WYT value)
     model_val_cols = [c for c in merged_df.columns if c.endswith(' Value')]
 
     # Build SAC map
