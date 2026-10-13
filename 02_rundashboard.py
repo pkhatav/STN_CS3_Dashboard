@@ -156,7 +156,7 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
 
     # Title
-    html.H1('CalSim3 Model Post-Processing Dashboard', style={'textAlign': 'center', 'fontSize': '36px', 'fontWeight': 'bold', 'marginTop': '20px', 'marginBottom': '20px', 'fontFamily': 'Arial, sans-serif'}),
+    html.H1('Central Valley Model Post-Processing Dashboard', style={'textAlign': 'center', 'fontSize': '36px', 'fontWeight': 'bold', 'marginTop': '20px', 'marginBottom': '20px', 'fontFamily': 'Arial, sans-serif'}),
 
     # Kind dropdown
     html.Div([

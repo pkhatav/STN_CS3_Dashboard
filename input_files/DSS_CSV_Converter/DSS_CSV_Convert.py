@@ -124,9 +124,9 @@ def convert_to_csv(
     if fv_file == "input_files/fv/planning_model_variables.fv":
         catalog = catalog[catalog["D"].str.upper() == "01JAN1920"]
         print(f"Catalog after D-part filter: {len(catalog)} rows")
-    #elif fv_file == "input_files/fv/hist_model_variables.fv":
-        #catalog = catalog[catalog["D"].str.upper() == "01JAN2000"]
-        #print(f"Catalog after D-part filter: {len(catalog)} rows")
+    elif fv_file == "input_files/fv/hist_model_variables.fv":
+        catalog = catalog[catalog["D"].str.upper() == "01JAN2000"]
+        print(f"Catalog after D-part filter: {len(catalog)} rows")
 
     # ------------------------------------------------------------
     # 4. Match only by Part B (your original workflow)
