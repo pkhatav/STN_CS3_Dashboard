@@ -1,6 +1,5 @@
 Model Name,File Location or WEAP Area,Type,Study
-Mekong 1.3.3,data/CS3HIST_Mekong_v1.3.3_DV.csv,Base,Historical
-I6,data/I6_NewGWDLL_Base_SODTrans.csv,Scenario,Planning
-SJWAM,data/SJWAM_12.30.24c_10.02.26.csv,Scenario,SJWAM
+I6 2020 LU,data/I6_Base_MaxProtectShasta_SODTransfers_2020LU.csv,Base,Planning
 SacWAM,data/SacWAM_2026.03.25_Hist_all_results_COAFix.csv,Scenario,SacWAM
+SJWAM,data/SJWAM_12.30.24c_10.02.26.csv,Scenario,SJWAM
 Historical Data,data\historical_data.csv,Historical,Historical

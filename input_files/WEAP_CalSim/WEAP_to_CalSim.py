@@ -4,21 +4,36 @@ import os
 from datetime import datetime
 import numpy as np
 
+# Folder where favorite exports are
+EXPORT_DIR = "data/WEAP_Favorites_Exports"
+
+# Files to include that don't have an ObjID (made to -999)
+FILES_WITHOUT_OBJID = {
+    'Theoretical_Catchment_Irrigation_Demand.csv'
+}
+
 def print_rows_below_given_row(csv_file, given_row=4):
     # Read in data as lines and convert to dataframe
     with open(csv_file, 'r', newline='') as f:
         rows = list(csv.reader(f))
 
-    units = rows[given_row-2][0] # where units are located in CSV
-    favorite = rows[given_row-4][0] # where the variable is coming from on weap
-    header = rows[given_row-1] # actual header row
-    data = rows[given_row:]    # rows with data
-    variable_col = header[1]   # variable names
+    units = rows[given_row-2][0]
+    favorite = rows[given_row-4][0]
+    header = rows[given_row-1]
+    data = rows[given_row:]
+    variable_col = header[1]
 
     df = pd.DataFrame(data, columns=header)
-    
+
     df['Units'] = units # add units column
     df['WEAP Favorite'] = favorite # add favorites column
+
+    # Theoretical demands don't have ObjIDs
+    if csv_file in [os.path.join(EXPORT_DIR, file) for file in FILES_WITHOUT_OBJID]:
+        variable_col = header[0] # branch
+        df['ObjID'] = -999
+    else:
+        variable_col = header[1] # normal WEAP variable column
 
     # Melt/transpose the dataframe to have the date and values as rows
     # ObjID, variable, units, and favorite as columns
@@ -35,17 +50,29 @@ def print_rows_below_given_row(csv_file, given_row=4):
     )
 
     # Additional formatting
-    df_long = df_long.rename(columns={variable_col:"WEAP Variable","Date":"Date_Time","Units":"WEAP Units"})
+    df_long = df_long.rename(
+        columns={
+            variable_col: "WEAP Variable",
+            "Date": "Date_Time",
+            "Units": "WEAP Units"
+        }
+    )
+
     df_long = df_long.sort_values(["WEAP Variable", "Date_Time"])
+
+    # ObjID formatting
     df_long['ObjID'] = df_long['ObjID'].astype(str).str.strip().astype(int)
 
     # Unit corrections/consistent formatting
-    df_long['Value'] = pd.to_numeric(df_long['Value'], errors='coerce')
-    
+    df_long['Value'] = pd.to_numeric(
+        df_long['Value'],
+        errors='coerce'
+    )
+
     mask = df_long['WEAP Units'].eq('Acre-foot') # AF to TAF
     df_long.loc[mask, 'Value'] /= 1000
     df_long.loc[mask, 'WEAP Units'] = 'taf'
-    
+
     df_long['WEAP Units'] = df_long['WEAP Units'].replace({
         'Thousand Acre Feet': 'taf',
         'Cubic Feet per Second': 'cfs'
@@ -73,26 +100,104 @@ def has_month_columns_and_objid(csv_file, header_row=3):
 
     return has_objid and has_month # only use CSVs that have these
 
+def add_calculated_data(df):
+
+    def aggregate_by_du(data):
+        # Sum Value, keep first for every other column
+        agg_dict = {
+            col: ('sum' if col == 'Value' else 'first')
+            for col in data.columns
+            if col not in ['Date_Time', 'DU']
+        }
+        return data.groupby(['Date_Time', 'DU'], as_index=False).agg(agg_dict)
+
+    # Rename DUs to sum together
+    du_renames = {
+        'A_61N_NA1': 'A_61_NA1',
+        'A_61S_NA1': 'A_61_NA1',
+    
+        'A_61N_NA4.1': 'A_61_NA4',
+        'A_61N_NA4.2': 'A_61_NA4',
+        'A_61N_NA4.3': 'A_61_NA4',
+        'A_61S_NA4.1': 'A_61_NA4',
+        'A_61S_NA4.2': 'A_61_NA4',
+    
+        'A_61N_PA3': 'A_61_PA3',
+        'A_61S_NA6': 'A_61_PA3',
+    
+        'A_62_NA6.1': 'A_62_NA6',
+        'A_62_NA6.2': 'A_62_NA6',
+        'A_62_NA7': 'A_62_NA6',
+
+        'A_63_NA3.1': 'A_63_NA3_1', # converted to 63_NA3 in mapping
+        'A_63_NA3.2': 'A_63_NA3_2', # converted to 63_NA5 in mapping
+    
+        'A_63_NA5': 'A_63_NA4',
+        'A_63_NA4': 'A_63_NA4',
+    
+        'A_64_NA2.1': 'A_64_NA2',
+        'A_64_NA2.2': 'A_64_NA2',
+        'A_64_NA2.3': 'A_64_NA2',
+        'A_64_NA3.1': 'A_64_NA2',
+        'A_64_NA3.2': 'A_64_NA2',
+        'A_64_NA3.3': 'A_64_NA2',
+        'A_64_NA4': 'A_64_NA2',
+    }
+
+    # Sum all groundwater pumping variables for each DU
+    gp_df = df[df['WEAP Favorite'] == 'Transmission Link Flow'].copy()
+    gp_df = gp_df[gp_df['WEAP Variable'].str.contains(r'GW to U_|GW to A_|GW to R_', na=False)].copy()
+    gp_df['DU'] = gp_df['WEAP Variable'].str.split('GW to', n=1).str[1].str.strip()
+    
+    gp_df['DU'] = gp_df['DU'].replace(du_renames)
+    gp_df['DU'] = gp_df['DU'].str.split('.').str[0].str.strip()
+    gp_df['DU'] = gp_df['DU'].str.replace(r'^(U_(?:62|63|64|71|72)_NU)\d+$',r'\1',regex=True) # If 62, 63, 64, 71, 72_NU{#}, sum and make it _NU
+    gp_df = aggregate_by_du(gp_df)
+
+    # Replace WEAP Variable with the calculated GP variable
+    gp_df['WEAP Variable'] = 'GP_' + gp_df['DU']
+    gp_df['ObjID'] = -999 # Give a synthetic ObjID
+    gp_df = gp_df.drop(columns='DU')
+
+    # Sum all demand variables for each DU
+    aw_df = df[df['WEAP Favorite'] == 'Theoretical Catchment Irrigation Demand'].copy()
+    aw_df['DU'] = aw_df['WEAP Variable'].str.strip()
+    aw_df['Mapped'] = aw_df['DU'].isin(du_renames)
+    aw_df['DU'] = aw_df['DU'].replace(du_renames)
+    aw_df['DU'] = aw_df['DU'].str.split('.').str[0].str.strip()
+
+    # Only append calculated rows that are summed
+    aw_df = aw_df.groupby(['Date_Time', 'DU']).filter(lambda x: x['Mapped'].any() or len(x) > 1)
+    aw_df = aw_df.drop(columns='Mapped')
+    aw_df = aggregate_by_du(aw_df)
+
+    # Replace WEAP Variable with the calculated AW variable
+    aw_df['WEAP Variable'] = aw_df['DU']
+    aw_df['ObjID'] = -999 # Give a synthetic ObjID
+    aw_df = aw_df.drop(columns='DU')
+
+    # Concat
+    return pd.concat([df, gp_df, aw_df], ignore_index=True)
+
 def create_weap_csv():
     '''
     This function creates a temporary WEAP CSV file from the CSVs in the WEAP_Favorites_Exports folder, which will then be converted to CalSim formatting.
     It only uses the CSVs listed in the WEAP Favorites tab of dashboard_name_mapping.xlsx that have month columns and ObjIDs. 
     '''
     
-    # Folder where favorite exports are
-    export_dir = "data/WEAP_Favorites_Exports"
-    
-    csv_list_file = pd.read_excel('input_files/dashboard_name_mapping.xlsx', sheet_name='WEAP Favorites')
+    csv_list_file = pd.read_excel('input_files/dashboard_name_mapping.xlsx', sheet_name='WEAP Favorites', usecols=['CalSim Kind','WEAP Favorite Name','CSV File','WEAP Location'])
     csv_list_file = csv_list_file.dropna()['CSV File'].to_list() # edit to only include certain files
 
     # Filter to specific CSVs
     csv_files = [
         file_path
         for csv_file in csv_list_file
-        for file_path in [os.path.join(export_dir, str(csv_file).strip())]
+        for file_path in [os.path.join(EXPORT_DIR, str(csv_file).strip())]
         if file_path.endswith(".csv")
         and os.path.exists(file_path)
-        and has_month_columns_and_objid(file_path) # function above
+        and (has_month_columns_and_objid(file_path) # function above
+             or file_path in [os.path.join(EXPORT_DIR, file) for file in FILES_WITHOUT_OBJID]
+            ) 
     ]
     
     all_dfs = [
@@ -101,30 +206,11 @@ def create_weap_csv():
     ]
     
     final_df = pd.concat(all_dfs, ignore_index=True)
+
+    # Append GP_ variables (function above)
+    final_df = add_calculated_data(final_df)
     
     final_df.to_csv('input_files/WEAP_CalSim/WEAP_file_tmp.csv', index=False)
-
-def make_weap_match_key(series):
-    # Creates a version of the WEAP variable that doesn't include any numbers
-    match_key = series.astype('string').str.strip()
-
-    # Keep the number when the slash is followed by "Reach"
-    is_reach = match_key.str.contains(
-        r'\\\s*Reach\b$',
-        case=False,
-        regex=True,
-        na=False
-    )
-
-    # Otherwise, remove the number immediately before the slash
-    match_key.loc[~is_reach] = (
-        match_key.loc[~is_reach]
-        .str.replace(r'\s*\d+\s*(?=\\)', '', regex=True)
-        .str.replace(r'\s+', ' ', regex=True)
-        .str.strip()
-    )
-
-    return match_key
 
 def add_wyt_data(weap_model, SJR_WYT_CSV, SAC_WYT_CSV, given_row=3):
     # Creates a dataframe with the SJ or Sac WYT data, depending on the model
@@ -173,8 +259,19 @@ def save_as_calsim_format(output_file, weap_model, SJR_WYT_CSV, SAC_WYT_CSV):
     '''
 
     # Filter map to SacWAM or SJWAM
-    calsim_weap_map = pd.read_excel('input_files/dashboard_name_mapping.xlsx', sheet_name='Final')
-    calsim_weap_map = calsim_weap_map.dropna()
+    calsim_weap_map = pd.read_excel(
+        'input_files/dashboard_name_mapping.xlsx',
+        sheet_name='Final',
+        usecols=[
+            'CalSim Variable',
+            'CalSim Kind',
+            'ObjID',
+            'WEAP Variable',
+            'WEAP Model',
+            'WEAP Favorite'
+        ]
+    )
+    calsim_weap_map = calsim_weap_map.dropna().drop_duplicates()
     calsim_weap_map = calsim_weap_map[
         calsim_weap_map['WEAP Model'].str.lower() == weap_model.lower()
     ]
@@ -184,21 +281,31 @@ def save_as_calsim_format(output_file, weap_model, SJR_WYT_CSV, SAC_WYT_CSV):
     # Only keep WEAP data that has a CalSim equivalent
     weap_file = pd.read_csv('input_files/WEAP_CalSim/WEAP_file_tmp.csv')
 
-    # Function above
-    calsim_weap_map['_weap_match_key'] = make_weap_match_key(
-        calsim_weap_map['WEAP Variable']
-    )
-    
-    weap_file['_weap_match_key'] = make_weap_match_key(
-        weap_file['WEAP Variable']
-    )
-
-    # Merge on ObjID, match key, and WEAP Favorite
-    df = weap_file.merge(
-        calsim_weap_map[['ObjID', '_weap_match_key', 'WEAP Favorite', 'WEAP Variable', 'CalSim Variable', 'CalSim Kind']],
-        on=['ObjID', '_weap_match_key', 'WEAP Favorite'],
+    # WEAP variables with ObjID: match using ObjID + WEAP Favorite
+    real_df = weap_file[weap_file['ObjID'] != -999].merge(
+        calsim_weap_map[
+            ['ObjID', 'WEAP Favorite', 'WEAP Variable',
+             'CalSim Variable', 'CalSim Kind']
+        ],
+        on=['ObjID', 'WEAP Favorite'],
         suffixes=['_after', '_before']
     )
+    
+    # WEAP variables without ObjID or synthetic variables: match using WEAP Variable + WEAP Favorite
+    synthetic_df = weap_file[weap_file['ObjID'] == -999].merge(
+        calsim_weap_map[
+            ['WEAP Favorite', 'WEAP Variable',
+             'CalSim Variable', 'CalSim Kind']
+        ],
+        on=['WEAP Favorite', 'WEAP Variable']
+    )
+    
+    # Concat
+    df = pd.concat(
+        [real_df, synthetic_df],
+        ignore_index=True
+    )
+    
     df = df.sort_values(['CalSim Variable', 'Date_Time'])
 
     # Print out any WEAP variable names that were changed
@@ -209,21 +316,7 @@ def save_as_calsim_format(output_file, weap_model, SJR_WYT_CSV, SAC_WYT_CSV):
         print(f"{row['WEAP Variable_before']} --> {row['WEAP Variable_after']}")
     # Save mismatch as CSV?
 
-    '''
-    # DEBUG TO CHECK IF OBJIDS CHANGE
-    debug = weap_file.merge(
-        calsim_weap_map[['ObjID', '_weap_match_key', 'WEAP Favorite', 'WEAP Variable']],
-        on=['_weap_match_key', 'WEAP Favorite'],
-        how='inner',
-        suffixes=['_after', '_before']
-    )
-    
-    objid_changes = debug[debug['ObjID_before'] != debug['ObjID_after']]
-
-    for _, row in objid_changes.iterrows():
-        print(f"ObjID {row['ObjID_before']} --> {row['ObjID_after']}")
-        print(f"{row['WEAP Variable_before']} --> {row['WEAP Variable_after']}")
-    '''
+    ### TBD: HOW TO PRINT OUT OBJID + WEAP VARIABLE NAME CHANGES
 
     # Drop and rename columns to get to CalSim format
     df = df[['WEAP Units', 'Date_Time', 'CalSim Variable', 'CalSim Kind', 'Value']] # in WEAP units
@@ -235,7 +328,7 @@ def save_as_calsim_format(output_file, weap_model, SJR_WYT_CSV, SAC_WYT_CSV):
 
     kind_mask = (
         df['Kind'].str.lower().str.contains(
-            'channel|diversion|evaporation|flow|inflow|return-flow|river-spills',
+            'applied-water|channel|delivery|diversion|evaporation|flow|gw-pumping|inflow|return-flow|river-spills',
             na=False
         )
         &

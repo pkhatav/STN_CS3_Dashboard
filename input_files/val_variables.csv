@@ -33,7 +33,7 @@ variables_to_sum,variable_name,coefficients,kind
 "['AW_60N_NA1', 'AW_60N_NA2', 'AW_60N_NA3', 'AW_60N_NA4', 'AW_60N_NA5']",AW_60N,"[1,1,1,1,1]",water_balance
 "['AW_60S_NA1', 'AW_60S_NA2', 'AW_60S_PA1', 'AW_60S_PA2']",AW_60S,"[1,1,1,1]",water_balance
 "[""AW_61_NA1"", ""AW_61_NA2"", ""AW_61_NA3"", ""AW_61_NA4"", ""AW_61_NA5"", ""AW_61_NA6"", ""AW_61_PA1"", ""AW_61_PA2"", ""AW_61_PA3""]",AW_61,"[1,1,1,1,1,1,1,1,1]",water_balance
-"['AW_61_NA1', 'AW_62_NA2', 'AW_62_NA3', 'AW_62_NA4', 'AW_62_NA5', 'AW_62_NA6']",AW_62,"[1,1,1,1,1,1]",water_balance
+"['AW_62_NA1', 'AW_62_NA2', 'AW_62_NA3', 'AW_62_NA4', 'AW_62_NA5', 'AW_62_NA6']",AW_62,"[1,1,1,1,1,1]",water_balance
 "['AW_63_NA1', 'AW_63_NA2', 'AW_63_NA3', 'AW_63_NA4', 'AW_63_NA5', 'AW_63_PR1', 'AW_63_PR2', 'AW_63_PR3']",AW_63,"[1,1,1,1,1,1,1,1]",water_balance
 "['AW_64_NA1', 'AW_64_NA2', 'AW_64_PA1', 'AW_64_PA2', 'AW_64_PA3', 'AW_64_XA']",AW_64,"[1,1,1,1,1,1]",water_balance
 "[""AW_71_NA1"", ""AW_71_NA2"", ""AW_71_PA1"", ""AW_71_PA2"", ""AW_71_PA3"", ""AW_71_PA4"", ""AW_71_PA5"", ""AW_71_PA6"", ""AW_71_PA8""]",AW_71,"[1,1,1,1,1,1,1,1,1]",water_balance
@@ -175,3 +175,79 @@ variables_to_sum,variable_name,coefficients,kind
 "[""D_CAA109_90_PA1"", ""D_CAA143_90_PA1"", ""D_CAA155_90_PA1"", ""D_CAA172_90_PA1"", ""D_CAA143_90_PA2""]",D_CAAXXX_90_PA1,"[1,1,1,1,1]",cs3_hist
 "[""D_CAA143_90_PU"", ""D_CAA156_90_PU"", ""D_CAA165_90_PU""]",D_CAAXXX_90_PU,"[1,1,1]",cs3_hist
 "[""D_MDC032_64_PA1"", ""D_MDC006_64_PA1""]",D_MDCXXX_64_PA1,"[1,1]",cs3_hist
+"[""AW_07N_NA"", ""AW_07S_NA""]",AW_07_NA,"[1, 1]",weap-applied-water
+"[""AW_07N_PA"", ""AW_07S_PA""]",AW_07_PA,"[1, 1]",weap-applied-water
+"[""AW_08N_NA"", ""AW_08S_NA1"", ""AW_08S_NA2""]",AW_08_NA,"[1, 1, 1]",weap-applied-water
+"[""AW_08N_PA"", ""AW_08S_PA""]",AW_08_PA,"[1, 1]",weap-applied-water
+"[""AW_08N_SA1"", ""AW_08S_SA1""]",AW_08_SA1,"[1, 1]",weap-applied-water
+"[""AW_08N_SA2"", ""AW_08S_SA2""]",AW_08_SA2,"[1, 1]",weap-applied-water
+"[""AW_12_NA"", ""AW_13_NA""]",AW_12_13_NA,"[1, 1]",weap-applied-water
+"[""AW_12_SA"", ""AW_13_SA""]",AW_12_13_SA,"[1, 1]",weap-applied-water
+"[""AW_15S_NA1"", ""AW_15S_NA2""]",AW_15S_NA,"[1, 1]",weap-applied-water
+"[""AW_16_NA1"", ""AW_16_NA2""]",AW_16_NA,"[1, 1]",weap-applied-water
+"[""AW_17N_NA"", ""AW_17S_NA""]",AW_17_NA,"[1, 1]",weap-applied-water
+"[""AW_18_SA"", ""AW_19_SA""]",AW_18_19_SA,"[1, 1]",weap-applied-water
+"[""AW_20_NA2"", ""AW_25_NA""]",AW_20_25_NA2,"[1, 1]",weap-applied-water
+"[""AW_20_PA"", ""AW_25_PA1"", ""AW_25_PA2""]",AW_20_25_PA,"[1, 1, 1]",weap-applied-water
+"[""AW_26N_NA"", ""AW_26S_NA""]",AW_26_NA,"[1, 1]",weap-applied-water
+"[""AW_60S_NA1"", ""AW_60S_NA2""]",AW_60S_NA,"[1, 1]",weap-applied-water
+"[""AW_60S_PA1"", ""AW_60S_PA2""]",AW_60S_PA,"[1, 1]",weap-applied-water
+"[""AW_61_NA1"", ""AW_61_NA2""]",AW_61N_NA1,"[1, 1]",weap-applied-water
+"[""AW_61_NA4"", ""AW_61_NA3""]",AW_61N_NA2,"[1, 1]",weap-applied-water
+"[""AW_61_NA5"", ""AW_61_NA6""]",AW_61N_NA3,"[1, 1]",weap-applied-water
+"[""AW_61_PA1"", ""AW_61_PA3""]",AW_61N_PA,"[1, 1]",weap-applied-water
+"[""AW_08S_PR"", ""AW_08N_PR1"", ""AW_08N_PR2""]",AW_08_PR,"[1, 1, 1]",weap-applied-water
+"[""AW_17N_NR"", ""AW_17S_NR""]",AW_17_NR,"[1, 1]",weap-applied-water
+"[""AW_03_PU1"", ""AW_03_PU2"", ""AW_03_PU3""]",AW_03_PU,"[1, 1, 1]",weap-applied-water
+"[""AW_04_NU1"", ""AW_04_NU2"", ""AW_06_NU""]",AW_04_06_NU,"[1, 1, 1]",weap-applied-water
+"[""AW_07N_NU"", ""AW_07S_NU""]",AW_07_NU,"[1, 1]",weap-applied-water
+"[""AW_08N_NU"", ""AW_08S_NU""]",AW_08_NU,"[1, 1]",weap-applied-water
+"[""AW_12_NU1"", ""AW_13_NU1""]",AW_12_13_NU1,"[1, 1]",weap-applied-water
+"[""AW_12_NU2"", ""AW_13_NU2""]",AW_12_13_NU2,"[1, 1]",weap-applied-water
+"[""AW_14_NU"", ""AW_15N_NU""]",AW_14_15N_NU,"[1, 1]",weap-applied-water
+"[""AW_17N_NU"", ""AW_17S_NU""]",AW_17_NU,"[1, 1]",weap-applied-water
+"[""AW_18_NU"", ""AW_19_NU""]",AW_18_19_NU,"[1, 1]",weap-applied-water
+"[""AW_20_NU1"", ""AW_20_NU2"", ""AW_25_NU""]",AW_20_25_NU,"[1, 1, 1]",weap-applied-water
+"[""AW_26N_NU1"", ""AW_26N_NU5"", ""AW_26N_NU4""]",AW_26_NU1,"[1, 1, 1]",weap-applied-water
+"[""AW_26N_NU3"", ""AW_26S_NU1""]",AW_26_NU3,"[1, 1]",weap-applied-water
+"[""AW_26S_NU2"", ""AW_26S_NU3""]",AW_26_NU4,"[1, 1]",weap-applied-water
+"[""AW_26N_PU2"", ""AW_26N_PU3""]",AW_26_PU2,"[1, 1]",weap-applied-water
+"[""AW_26S_PU4"", ""AW_26S_PU5"", ""AW_26S_PU6""]",AW_26_PU4,"[1, 1, 1]",weap-applied-water
+"[""GP_07N_NA"", ""GP_07S_NA""]",GP_07_NA,"[1, 1]",weap-gw-pumping
+"[""GP_07N_PA"", ""GP_07S_PA""]",GP_07_PA,"[1, 1]",weap-gw-pumping
+"[""GP_08N_NA"", ""GP_08S_NA1"", ""GP_08S_NA2""]",GP_08_NA,"[1, 1, 1]",weap-gw-pumping
+"[""GP_08N_PA"", ""GP_08S_PA""]",GP_08_PA,"[1, 1]",weap-gw-pumping
+"[""GP_08N_SA1"", ""GP_08S_SA1""]",GP_08_SA1,"[1, 1]",weap-gw-pumping
+"[""GP_08N_SA2"", ""GP_08S_SA2""]",GP_08_SA2,"[1, 1]",weap-gw-pumping
+"[""GP_12_NA"", ""GP_13_NA""]",GP_12_13_NA,"[1, 1]",weap-gw-pumping
+"[""GP_12_SA"", ""GP_13_SA""]",GP_12_13_SA,"[1, 1]",weap-gw-pumping
+"[""GP_15S_NA1"", ""GP_15S_NA2""]",GP_15S_NA,"[1, 1]",weap-gw-pumping
+"[""GP_16_NA1"", ""GP_16_NA2""]",GP_16_NA,"[1, 1]",weap-gw-pumping
+"[""GP_17N_NA"", ""GP_17S_NA""]",GP_17_NA,"[1, 1]",weap-gw-pumping
+"[""GP_18_SA"", ""GP_19_SA""]",GP_18_19_SA,"[1, 1]",weap-gw-pumping
+"[""GP_20_NA2"", ""GP_25_NA""]",GP_20_25_NA2,"[1, 1]",weap-gw-pumping
+"[""GP_20_PA"", ""GP_25_PA1"", ""GP_25_PA2""]",GP_20_25_PA,"[1, 1, 1]",weap-gw-pumping
+"[""GP_26N_NA"", ""GP_26S_NA""]",GP_26_NA,"[1, 1]",weap-gw-pumping
+"[""GP_60S_NA1"", ""GP_60S_NA2""]",GP_60S_NA,"[1, 1]",weap-gw-pumping
+"[""GP_60S_PA1"", ""GP_60S_PA2""]",GP_60S_PA,"[1, 1]",weap-gw-pumping
+"[""GP_61_NA1"", ""GP_61_NA2""]",GP_61N_NA1,"[1, 1]",weap-gw-pumping
+"[""GP_61_NA4"", ""GP_61_NA3""]",GP_61N_NA2,"[1, 1]",weap-gw-pumping
+"[""GP_61_NA5"", ""GP_61_NA6""]",GP_61N_NA3,"[1, 1]",weap-gw-pumping
+"[""GP_61_PA1"", ""GP_61_PA3""]",GP_61N_PA,"[1, 1]",weap-gw-pumping
+"[""GP_08S_PR"", ""GP_08N_PR1"", ""GP_08N_PR2""]",GP_08_PR,"[1, 1, 1]",weap-gw-pumping
+"[""GP_17N_NR"", ""GP_17S_NR""]",GP_17_NR,"[1, 1]",weap-gw-pumping
+"[""GP_03_PU1"", ""GP_03_PU2"", ""GP_03_PU3""]",GP_03_PU,"[1, 1, 1]",weap-gw-pumping
+"[""GP_04_NU1"", ""GP_04_NU2"", ""GP_06_NU""]",GP_04_06_NU,"[1, 1, 1]",weap-gw-pumping
+"[""GP_07N_NU"", ""GP_07S_NU""]",GP_07_NU,"[1, 1]",weap-gw-pumping
+"[""GP_08N_NU"", ""GP_08S_NU""]",GP_08_NU,"[1, 1]",weap-gw-pumping
+"[""GP_12_NU1"", ""GP_13_NU1""]",GP_12_13_NU1,"[1, 1]",weap-gw-pumping
+"[""GP_12_NU2"", ""GP_13_NU2""]",GP_12_13_NU2,"[1, 1]",weap-gw-pumping
+"[""GP_14_NU"", ""GP_15N_NU""]",GP_14_15N_NU,"[1, 1]",weap-gw-pumping
+"[""GP_17N_NU"", ""GP_17S_NU""]",GP_17_NU,"[1, 1]",weap-gw-pumping
+"[""GP_18_NU"", ""GP_19_NU""]",GP_18_19_NU,"[1, 1]",weap-gw-pumping
+"[""GP_20_NU1"", ""GP_20_NU2"", ""GP_25_NU""]",GP_20_25_NU,"[1, 1, 1]",weap-gw-pumping
+"[""GP_26N_NU1"", ""GP_26N_NU5"", ""GP_26N_NU4""]",GP_26_NU1,"[1, 1, 1]",weap-gw-pumping
+"[""GP_26N_NU3"", ""GP_26S_NU1""]",GP_26_NU3,"[1, 1]",weap-gw-pumping
+"[""GP_26S_NU2"", ""GP_26S_NU3""]",GP_26_NU4,"[1, 1]",weap-gw-pumping
+"[""GP_26N_PU2"", ""GP_26N_PU3""]",GP_26_PU2,"[1, 1]",weap-gw-pumping
+"[""GP_26S_PU4"", ""GP_26S_PU5"", ""GP_26S_PU6""]",GP_26_PU4,"[1, 1, 1]",weap-gw-pumping
